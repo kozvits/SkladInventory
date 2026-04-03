@@ -363,21 +363,28 @@ jobs:
           PY
 
       - name: Decode keystore
-        if: ${{ secrets.KEYSTORE != '' }}
         env:
           KEYSTORE: ${{ secrets.KEYSTORE }}
         run: |
-          echo "$KEYSTORE" | base64 -d > keystore.jks
-          ls -la keystore.jks
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > keystore.jks
+            ls -la keystore.jks
+          else
+            echo "No keystore provided; will build unsigned release."
+          fi
 
       - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -f keystore.jks ]; then
             gradle --no-daemon assembleRelease \
               -PstoreFile=keystore.jks \
-              -PstorePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
-              -PkeyAlias="${{ secrets.KEY_ALIAS }}" \
-              -PkeyPassword="${{ secrets.KEY_PASSWORD }}" \
+              -PstorePassword="$KEYSTORE_PASSWORD" \
+              -PkeyAlias="$KEY_ALIAS" \
+              -PkeyPassword="$KEY_PASSWORD" \
               --stacktrace
           else
             gradle --no-daemon assembleRelease --stacktrace
