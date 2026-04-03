@@ -1,4 +1,3 @@
-```yaml
 name: Android CI
 
 on:
@@ -219,4 +218,3 @@ jobs:
             - Signed APK (if keystore provided)
 
             📦 APK attached below
-```
