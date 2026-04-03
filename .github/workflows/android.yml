@@ -65,7 +65,6 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      # 🔥 Запуск эмулятора
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -133,6 +132,12 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze
 
@@ -165,18 +170,26 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      # 🔐 Подпись APK (если есть секреты)
+      # Декодируем keystore (если есть)
       - name: Decode keystore
-        if: ${{ secrets.KEYSTORE != '' }}
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > keystore.jks
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > keystore.jks
+          fi
 
       - name: Build Release APK
         run: |
-          ./gradlew assembleRelease \
-          -PstoreFile=keystore.jks \
-          -PstorePassword=${{ secrets.KEYSTORE_PASSWORD }} \
-          -PkeyAlias=${{ secrets.KEY_ALIAS }} \
-          -PkeyPassword=${{ secrets.KEY_PASSWORD }}
+          if [ -f keystore.jks ]; then
+            ./gradlew assembleRelease \
+              -PstoreFile=keystore.jks \
+              -PstorePassword=${{ secrets.KEYSTORE_PASSWORD }} \
+              -PkeyAlias=${{ secrets.KEY_ALIAS }} \
+              -PkeyPassword=${{ secrets.KEY_PASSWORD }}
+          else
+            ./gradlew assembleRelease
+          fi
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
@@ -193,6 +206,6 @@ jobs:
             
             ### Changes:
             - Automated CI/CD build
-            - Signed APK
+            - Signed APK (if keystore provided)
             
             📦 APK attached below
