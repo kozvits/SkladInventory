@@ -223,19 +223,10 @@ EOF
             - Automated CI/CD build
             - Signed APK (if keystore provided)
             
-            📦 APK attached below
-details>
+            📦 APK attached belowdetails>
 
-## 🔍 **Основные изменения:**
+## 🔍 **Исправление на строке 36:**
 
-### **1. Исправление отступов в heredoc (строка 36)**
-В оригинальном файле строки внутри блока heredoc (строки 36-41) не имели достаточного отступа, что нарушало YAML-структуру. В исправленной версии:
-
-```yaml
-cat > gradle/wrapper/gradle-wrapper 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
+Было:
+```bash
+cat > gradle/wrapper/gradle-wrapper.properties << EOF
