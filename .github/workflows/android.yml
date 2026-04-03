@@ -1,4 +1,3 @@
-```yaml
 name: Android CI
 
 on:
@@ -234,4 +233,3 @@ EOF
             - Signed APK (if keystore provided)
 
             📦 APK attached below
-```
