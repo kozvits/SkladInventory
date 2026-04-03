@@ -40,6 +40,17 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Align Detekt plugin version
+        run: |
+          if [ -f app/build.gradle ]; then
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
+          fi
+          if [ -f app/build.gradle.kts ]; then
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          fi
+
       - name: Build Debug APK
         run: gradle --no-daemon assembleDebug --stacktrace
 
@@ -83,6 +94,17 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Align Detekt plugin version
+        run: |
+          if [ -f app/build.gradle ]; then
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
+          fi
+          if [ -f app/build.gradle.kts ]; then
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          fi
+
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -125,6 +147,17 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Align Detekt plugin version
+        run: |
+          if [ -f app/build.gradle ]; then
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
+          fi
+          if [ -f app/build.gradle.kts ]; then
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          fi
 
       - name: Detekt
         run: gradle --no-daemon detekt --stacktrace
@@ -170,6 +203,17 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Align Detekt plugin version
+        run: |
+          if [ -f app/build.gradle ]; then
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
+          fi
+          if [ -f app/build.gradle.kts ]; then
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          fi
+
       - name: Run dependency check
         run: gradle --no-daemon dependencyCheckAnalyze --stacktrace
 
@@ -210,6 +254,17 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Align Detekt plugin version
+        run: |
+          if [ -f app/build.gradle ]; then
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
+            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
+          fi
+          if [ -f app/build.gradle.kts ]; then
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
+            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          fi
 
       - name: Decode keystore
         env:
