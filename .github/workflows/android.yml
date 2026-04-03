@@ -14,14 +14,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name:极速下载 Set up JDK 17
-      uses: actions/setup-java@v4
+    - name: Set up JDK 17
+      uses极速下载: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
     - name: Setup Android SDK
-      uses: android-actions/s极速下载etup-android@v3
+      uses: android-actions/setup-android@v3
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -67,7 +67,7 @@ jobs:
         ANDROID_EMULATOR: true
 
     - name: Upload test results
-      uses: actions/upload-artifact@极速下载v4
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
@@ -88,7 +88,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
+   极速下载 - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
     - name: Grant execute permission for gradlew
@@ -100,10 +100,10 @@ jobs:
     - name: Sign APK
       if: ${{ secrets.KEYSTORE != '' }}
       run: |
-        echo "${{ secrets.KEYSTORE }}" | base64 -d > keystore.jks
+        echo "${{ secrets.KEYSTORE }}" | base64 -极速下载d > keystore.jks
         ./gradlew assembleRelease -PstoreFile=keystore.jks -PstorePassword=${{ secrets.KEYSTORE_PASSWORD }} -PkeyAlias=${{ secrets.KEY_ALIAS }} -PkeyPassword=${{ secrets.KEY_PASSWORD }}
 
-    - name: Upload release APK
+    - name: Upload release APK极速下载
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
@@ -113,7 +113,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: app/build/outputs/apk/release/*.ap极速下载k
+        files: app/build/outputs/apk/release/*.apk
         body: |
           ## Inventory App Release
           
@@ -168,7 +168,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@极速下载v4
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
