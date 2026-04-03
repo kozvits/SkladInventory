@@ -14,14 +14,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name:极速下载 Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/s极速下载etup-android@v3
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -67,7 +67,7 @@ jobs:
         ANDROID_EMULATOR: true
 
     - name: Upload test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@极速下载v4
       if: always()
       with:
         name: test-results
@@ -98,7 +98,7 @@ jobs:
       run: ./gradlew assembleRelease
 
     - name: Sign APK
-      if: secrets.KEYSTORE != ''
+      if: ${{ secrets.KEYSTORE != '' }}
       run: |
         echo "${{ secrets.KEYSTORE }}" | base64 -d > keystore.jks
         ./gradlew assembleRelease -PstoreFile=keystore.jks -PstorePassword=${{ secrets.KEYSTORE_PASSWORD }} -PkeyAlias=${{ secrets.KEY_ALIAS }} -PkeyPassword=${{ secrets.KEY_PASSWORD }}
@@ -113,7 +113,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: app/build/outputs/apk/release/*.apk
+        files: app/build/outputs/apk/release/*.ap极速下载k
         body: |
           ## Inventory App Release
           
