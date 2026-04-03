@@ -2,11 +2,11 @@ name: Android CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     tags:
       - 'v*'
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   build:
@@ -28,17 +28,16 @@ jobs:
 
       - name: Verify Gradle Wrapper
         run: |
-          # Проверяем наличие Gradle Wrapper файлов
           if [ ! -f "gradlew" ]; then
             echo "gradlew not found, generating..."
             mkdir -p gradle/wrapper
-            cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+            cat > gradle/wrapper/gradle-wrapper.properties << 'EOL'
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-EOF
+EOL
           fi
           chmod +x gradlew
 
@@ -183,7 +182,6 @@ EOF
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      # Декодируем keystore (если есть)
       - name: Decode keystore
         if: ${{ secrets.KEYSTORE != '' }}
         run: |
