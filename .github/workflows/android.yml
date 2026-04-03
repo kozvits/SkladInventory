@@ -26,6 +26,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Create gradle.properties
+        run: |
+          cat > gradle.properties << 'EOF'
+org.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configureondemand=false
+android.useAndroidX=true
+android.enableJetifier=true
+kotlin.daemon.jvm.options=-Xmx2048m
+EOF
+
       - name: Verify Gradle Wrapper
         run: |
           if [ ! -f "gradlew" ]; then
@@ -37,6 +49,9 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
+        env:
+          GRADLE_OPTS: ""
+          JAVA_OPTS: ""
 
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
@@ -218,3 +233,4 @@ jobs:
             - Signed APK (if keystore provided)
 
             📦 APK attached below
+```
