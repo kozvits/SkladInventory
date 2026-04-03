@@ -31,13 +31,7 @@ jobs:
           if [ ! -f "gradlew" ]; then
             echo "gradlew not found, generating..."
             mkdir -p gradle/wrapper
-            cat > gradle/wrapper/gradle-wrapper.properties << 'EOL'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOL
+            printf 'distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.5-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\n' > gradle/wrapper/gradle-wrapper.properties
           fi
           chmod +x gradlew
 
