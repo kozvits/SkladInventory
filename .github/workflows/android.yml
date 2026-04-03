@@ -1,3 +1,4 @@
+```yaml
 name: Android CI
 
 on:
@@ -177,9 +178,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Decode keystore
-        if: ${{ secrets.KEYSTORE != '' }}
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+        if: env.KEYSTORE != ''
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 -d > keystore.jks
+          echo "$KEYSTORE" | base64 -d > keystore.jks
           echo "Keystore file created:"
           ls -la keystore.jks
 
@@ -216,3 +219,4 @@ jobs:
             - Signed APK (if keystore provided)
 
             📦 APK attached below
+```
