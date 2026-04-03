@@ -26,8 +26,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
+      - name: Verify Gradle Wrapper
+        run: |
+          # Проверяем наличие Gradle Wrapper файлов
+          if [ ! -f "gradlew" ]; then
+            echo "gradlew not found, generating..."
+            mkdir -p gradle/wrapper
+            cat > gradle/wrapper/gradle-wrapper.properties << EOF
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF
+          fi
+          chmod +x gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
@@ -172,22 +185,23 @@ jobs:
 
       # Декодируем keystore (если есть)
       - name: Decode keystore
-        env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
+        if: ${{ secrets.KEYSTORE != '' }}
         run: |
-          if [ -n "$KEYSTORE" ]; then
-            echo "$KEYSTORE" | base64 -d > keystore.jks
-          fi
+          echo "${{ secrets.KEYSTORE }}" | base64 -d > keystore.jks
+          echo "Keystore file created:"
+          ls -la keystore.jks
 
       - name: Build Release APK
         run: |
           if [ -f keystore.jks ]; then
+            echo "Building signed release APK..."
             ./gradlew assembleRelease \
               -PstoreFile=keystore.jks \
-              -PstorePassword=${{ secrets.KEYSTORE_PASSWORD }} \
-              -PkeyAlias=${{ secrets.KEY_ALIAS }} \
-              -PkeyPassword=${{ secrets.KEY_PASSWORD }}
+              -PstorePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
+              -PkeyAlias="${{ secrets.KEY_ALIAS }}" \
+              -PkeyPassword="${{ secrets.KEY_PASSWORD }}"
           else
+            echo "Building unsigned release APK..."
             ./gradlew assembleRelease
           fi
 
@@ -199,6 +213,7 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+        if: ${{ success() }}
         with:
           files: app/build/outputs/apk/release/*.apk
           body: |
