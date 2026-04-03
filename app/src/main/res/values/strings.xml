@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Inventory App</string>
+    <string name="camera_permission_required">Требуется разрешение на использование камеры</string>
+    <string name="new_product">Новый товар</string>
+    <string name="product_name">Название товара</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отмена</string>
+    <string name="create_new_group">Создать новую группу</string>
+    <string name="group_name">Название группы</string>
+    <string name="create">Создать</string>
+    <string name="delete">Удалить</string>
+    <string name="scan">Сканировать</string>
+    <string name="back">Назад</string>
+    <string name="inventory_groups">Группы инвентаризации</string>
+    <string name="barcode">Штрих-код: %s</string>
+</resources>
