@@ -28,36 +28,35 @@ jobs:
 
       - name: Create gradle.properties
         run: |
-          cat << 'EOF' > gradle.properties
-org.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
-org.gradle.parallel=true
-org.gradle.caching=true
-org.gradle.configureondemand=false
-android.useAndroidX=true
-android.enableJetifier=true
-kotlin.daemon.jvm.options=-Xmx2048m
-EOF
+          printf "%s\n" \
+            "org.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8" \
+            "org.gradle.parallel=true" \
+            "org.gradle.caching=true" \
+            "org.gradle.configureondemand=false" \
+            "android.useAndroidX=true" \
+            "android.enableJetifier=true" \
+            "kotlin.daemon.jvm.options=-Xmx2048m" \
+            > gradle.properties
 
       - name: Verify Gradle Wrapper
         run: |
           if [ ! -f "gradlew" ]; then
-            echo "gradlew not found, generating..."
-            mkdir -p gradle/wrapper
-            printf 'distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.5-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\n' > gradle/wrapper/gradle-wrapper.properties
+            echo "gradlew not found in repository"
+            exit 1
           fi
           chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
         env:
           GRADLE_OPTS: ""
           JAVA_OPTS: ""
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew lintDebug --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -92,7 +91,7 @@ EOF
           api-level: 30
           arch: x86_64
           profile: Nexus 6
-          script: ./gradlew connectedDebugAndroidTest
+          script: ./gradlew connectedDebugAndroidTest --stacktrace
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@v4
@@ -123,11 +122,11 @@ EOF
         run: chmod +x gradlew
 
       - name: Detekt
-        run: ./gradlew detekt
+        run: ./gradlew detekt --stacktrace
         continue-on-error: true
 
       - name: Ktlint
-        run: ./gradlew ktlintCheck
+        run: ./gradlew ktlintCheck --stacktrace
         continue-on-error: true
 
       - name: Upload Reports
@@ -160,7 +159,7 @@ EOF
         run: chmod +x gradlew
 
       - name: Run dependency check
-        run: ./gradlew dependencyCheckAnalyze
+        run: ./gradlew dependencyCheckAnalyze --stacktrace
 
       - name: Upload Report
         uses: actions/upload-artifact@v4
@@ -208,10 +207,11 @@ EOF
               -PstoreFile=keystore.jks \
               -PstorePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
               -PkeyAlias="${{ secrets.KEY_ALIAS }}" \
-              -PkeyPassword="${{ secrets.KEY_PASSWORD }}"
+              -PkeyPassword="${{ secrets.KEY_PASSWORD }}" \
+              --stacktrace
           else
             echo "Building unsigned release APK..."
-            ./gradlew assembleRelease
+            ./gradlew assembleRelease --stacktrace
           fi
 
       - name: Upload Release APK
