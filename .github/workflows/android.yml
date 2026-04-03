@@ -32,7 +32,7 @@ jobs:
           if [ ! -f "gradlew" ]; then
             echo "gradlew not found, generating..."
             mkdir -p gradle/wrapper
-            cat > gradle/wrapper/gradle-wrapper 'EOF'
+            cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
@@ -218,15 +218,9 @@ EOF
           files: app/build/outputs/apk/release/*.apk
           body: |
             🚀 Android Release
-            
+
             ### Changes:
             - Automated CI/CD build
             - Signed APK (if keystore provided)
-            
-            📦 APK attached belowdetails>
 
-## 🔍 **Исправление на строке 36:**
-
-Было:
-```bash
-cat > gradle/wrapper/gradle-wrapper.properties << EOF
+            📦 APK attached below
