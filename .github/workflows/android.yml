@@ -40,80 +40,42 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Force plugin versions compatible with classpath
         run: |
           python3 - <<'PY'
-          import pathlib
-          import re
-
-          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
-          for p in targets:
-              s = p.read_text(encoding='utf-8', errors='ignore')
-
-              # detekt plugin
-              s = re.sub(
-                  r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])",
-                  r"\g<1>1.23.0\2",
-                  s
-              )
-              s = re.sub(
-                  r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
-                  r"\g<1>1.23.0\2",
-                  s
-              )
-
-              # ktlint plugin
-              s = re.sub(
-                  r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])",
-                  r"\g<1>11.5.0\2",
-                  s
-              )
-              s = re.sub(
-                  r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
-                  r"\g<1>11.5.0\2",
-                  s
-              )
-
-              # dependency-check plugin
-              s = re.sub(
-                  r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])",
-                  r"\g<1>8.4.0\2",
-                  s
-              )
-              s = re.sub(
-                  r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
-                  r"\g<1>8.4.0\2",
-                  s
-              )
-
-              # buildscript classpath dependencies
-              s = re.sub(
-                  r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*",
-                  r"\g<1>1.23.0",
-                  s
-              )
-              s = re.sub(
-                  r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*",
-                  r"\g<1>11.5.0",
-                  s
-              )
-              s = re.sub(
-                  r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*",
-                  r"\g<1>8.4.0",
-                  s
-              )
-
-              p.write_text(s, encoding='utf-8')
+          import pathlib, re
+          REPLACEMENTS = [
+              (r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^\s'\")}]*", r"\g<1>1.23.0"),
+              (r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^\s'\")}]*", r"\g<1>11.5.0"),
+              (r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(org\.owasp:dependency-check-gradle:)[0-9][^\s'\")}]*", r"\g<1>8.4.0"),
+          ]
+          for p in [f for f in pathlib.Path('.').rglob('*') if f.suffix in ('.gradle', '.kts') and f.is_file()]:
+              orig = p.read_text(encoding='utf-8', errors='ignore')
+              patched = orig
+              for pat, repl in REPLACEMENTS:
+                  patched = re.sub(pat, repl, patched)
+              if patched != orig:
+                  p.write_text(patched, encoding='utf-8')
+                  print(f"Patched: {p}")
           PY
 
       - name: Build Debug APK
-        run: gradle --no-daemon assembleDebug --stacktrace
+        run: ./gradlew --no-daemon :app:assembleDebug --stacktrace
 
       - name: Run Unit Tests
-        run: gradle --no-daemon testDebugUnitTest --stacktrace
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --stacktrace
 
       - name: Lint
-        run: gradle --no-daemon lintDebug --stacktrace
+        run: ./gradlew --no-daemon :app:lintDebug --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -149,25 +111,31 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Force plugin versions compatible with classpath
         run: |
           python3 - <<'PY'
-          import pathlib
-          import re
-
-          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
-          for p in targets:
-              s = p.read_text(encoding='utf-8', errors='ignore')
-              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
-              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
-              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
-              p.write_text(s, encoding='utf-8')
+          import pathlib, re
+          REPLACEMENTS = [
+              (r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^\s'\")}]*", r"\g<1>1.23.0"),
+              (r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^\s'\")}]*", r"\g<1>11.5.0"),
+              (r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(org\.owasp:dependency-check-gradle:)[0-9][^\s'\")}]*", r"\g<1>8.4.0"),
+          ]
+          for p in [f for f in pathlib.Path('.').rglob('*') if f.suffix in ('.gradle', '.kts') and f.is_file()]:
+              orig = p.read_text(encoding='utf-8', errors='ignore')
+              patched = orig
+              for pat, repl in REPLACEMENTS:
+                  patched = re.sub(pat, repl, patched)
+              if patched != orig:
+                  p.write_text(patched, encoding='utf-8')
           PY
 
       - name: Run instrumented tests
@@ -176,7 +144,7 @@ jobs:
           api-level: 30
           arch: x86_64
           profile: Nexus 6
-          script: gradle --no-daemon connectedDebugAndroidTest --stacktrace
+          script: ./gradlew --no-daemon :app:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Test Reports
         if: always()
@@ -213,33 +181,39 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Force plugin versions compatible with classpath
         run: |
           python3 - <<'PY'
-          import pathlib
-          import re
-
-          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
-          for p in targets:
-              s = p.read_text(encoding='utf-8', errors='ignore')
-              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
-              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
-              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
-              p.write_text(s, encoding='utf-8')
+          import pathlib, re
+          REPLACEMENTS = [
+              (r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^\s'\")}]*", r"\g<1>1.23.0"),
+              (r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^\s'\")}]*", r"\g<1>11.5.0"),
+              (r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(org\.owasp:dependency-check-gradle:)[0-9][^\s'\")}]*", r"\g<1>8.4.0"),
+          ]
+          for p in [f for f in pathlib.Path('.').rglob('*') if f.suffix in ('.gradle', '.kts') and f.is_file()]:
+              orig = p.read_text(encoding='utf-8', errors='ignore')
+              patched = orig
+              for pat, repl in REPLACEMENTS:
+                  patched = re.sub(pat, repl, patched)
+              if patched != orig:
+                  p.write_text(patched, encoding='utf-8')
           PY
 
       - name: Detekt
-        run: gradle --no-daemon detekt --stacktrace
+        run: ./gradlew --no-daemon :app:detekt --stacktrace
         continue-on-error: true
 
       - name: Ktlint
-        run: gradle --no-daemon ktlintCheck --stacktrace
+        run: ./gradlew --no-daemon :app:ktlintCheck --stacktrace
         continue-on-error: true
 
       - name: Upload Reports
@@ -278,29 +252,35 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Force plugin versions compatible with classpath
         run: |
           python3 - <<'PY'
-          import pathlib
-          import re
-
-          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
-          for p in targets:
-              s = p.read_text(encoding='utf-8', errors='ignore')
-              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
-              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
-              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
-              p.write_text(s, encoding='utf-8')
+          import pathlib, re
+          REPLACEMENTS = [
+              (r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^\s'\")}]*", r"\g<1>1.23.0"),
+              (r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^\s'\")}]*", r"\g<1>11.5.0"),
+              (r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(org\.owasp:dependency-check-gradle:)[0-9][^\s'\")}]*", r"\g<1>8.4.0"),
+          ]
+          for p in [f for f in pathlib.Path('.').rglob('*') if f.suffix in ('.gradle', '.kts') and f.is_file()]:
+              orig = p.read_text(encoding='utf-8', errors='ignore')
+              patched = orig
+              for pat, repl in REPLACEMENTS:
+                  patched = re.sub(pat, repl, patched)
+              if patched != orig:
+                  p.write_text(patched, encoding='utf-8')
           PY
 
       - name: Run dependency check
-        run: gradle --no-daemon dependencyCheckAnalyze --stacktrace
+        run: ./gradlew --no-daemon :app:dependencyCheckAnalyze --stacktrace
         continue-on-error: true
 
       - name: Upload Report
@@ -341,25 +321,31 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Force plugin versions compatible with classpath
         run: |
           python3 - <<'PY'
-          import pathlib
-          import re
-
-          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
-          for p in targets:
-              s = p.read_text(encoding='utf-8', errors='ignore')
-              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
-              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
-              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
-              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
-              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
-              p.write_text(s, encoding='utf-8')
+          import pathlib, re
+          REPLACEMENTS = [
+              (r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2"),
+              (r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^\s'\")}]*", r"\g<1>1.23.0"),
+              (r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2"),
+              (r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^\s'\")}]*", r"\g<1>11.5.0"),
+              (r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2"),
+              (r"(org\.owasp:dependency-check-gradle:)[0-9][^\s'\")}]*", r"\g<1>8.4.0"),
+          ]
+          for p in [f for f in pathlib.Path('.').rglob('*') if f.suffix in ('.gradle', '.kts') and f.is_file()]:
+              orig = p.read_text(encoding='utf-8', errors='ignore')
+              patched = orig
+              for pat, repl in REPLACEMENTS:
+                  patched = re.sub(pat, repl, patched)
+              if patched != orig:
+                  p.write_text(patched, encoding='utf-8')
           PY
 
       - name: Decode keystore
@@ -368,9 +354,11 @@ jobs:
         run: |
           if [ -n "$KEYSTORE" ]; then
             echo "$KEYSTORE" | base64 -d > keystore.jks
+            echo "KEYSTORE_PRESENT=true" >> "$GITHUB_ENV"
             ls -la keystore.jks
           else
-            echo "No keystore provided; will build unsigned release."
+            echo "No keystore secret provided; will build unsigned release."
+            echo "KEYSTORE_PRESENT=false" >> "$GITHUB_ENV"
           fi
 
       - name: Build Release APK
@@ -379,15 +367,15 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -f keystore.jks ]; then
-            gradle --no-daemon assembleRelease \
+          if [ "$KEYSTORE_PRESENT" = "true" ]; then
+            ./gradlew --no-daemon :app:assembleRelease \
               -PstoreFile=keystore.jks \
               -PstorePassword="$KEYSTORE_PASSWORD" \
               -PkeyAlias="$KEY_ALIAS" \
               -PkeyPassword="$KEY_PASSWORD" \
               --stacktrace
           else
-            gradle --no-daemon assembleRelease --stacktrace
+            ./gradlew --no-daemon :app:assembleRelease --stacktrace
           fi
 
       - name: Upload Release APK
