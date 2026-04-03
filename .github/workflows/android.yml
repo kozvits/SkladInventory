@@ -33,11 +33,19 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Fix gradlew DEFAULT_JVM_OPTS quoting
+        run: |
+          echo "=== gradlew DEFAULT_JVM_OPTS before ==="
+          grep 'DEFAULT_JVM_OPTS' gradlew || echo "(not found)"
+          # Заменяем любое значение DEFAULT_JVM_OPTS на безопасное без вложенных кавычек
+          sed -i 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew
+          echo "=== gradlew DEFAULT_JVM_OPTS after ==="
+          grep 'DEFAULT_JVM_OPTS' gradlew
+
       - name: Clean gradle.properties JVM args
         run: |
           mkdir -p "$HOME/.gradle"
           GRADLE_PROPS="$HOME/.gradle/gradle.properties"
-          # Удаляем все строки org.gradle.jvmargs и пишем безопасные
           grep -v '^org\.gradle\.jvmargs' "$GRADLE_PROPS" > /tmp/gp.tmp 2>/dev/null || true
           mv /tmp/gp.tmp "$GRADLE_PROPS" 2>/dev/null || true
           echo 'org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8' >> "$GRADLE_PROPS"
@@ -116,6 +124,12 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Fix gradlew DEFAULT_JVM_OPTS quoting
+        run: |
+          sed -i '' 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew 2>/dev/null || \
+          sed -i 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew
+          grep 'DEFAULT_JVM_OPTS' gradlew
+
       - name: Clean gradle.properties JVM args
         run: |
           mkdir -p "$HOME/.gradle"
@@ -187,6 +201,11 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Fix gradlew DEFAULT_JVM_OPTS quoting
+        run: |
+          sed -i 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew
+          grep 'DEFAULT_JVM_OPTS' gradlew
 
       - name: Clean gradle.properties JVM args
         run: |
@@ -265,6 +284,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Fix gradlew DEFAULT_JVM_OPTS quoting
+        run: |
+          sed -i 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew
+          grep 'DEFAULT_JVM_OPTS' gradlew
+
       - name: Clean gradle.properties JVM args
         run: |
           mkdir -p "$HOME/.gradle"
@@ -335,6 +359,11 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Fix gradlew DEFAULT_JVM_OPTS quoting
+        run: |
+          sed -i 's/^DEFAULT_JVM_OPTS=.*/DEFAULT_JVM_OPTS="-Xmx2g -Xms512m -Dfile.encoding=UTF-8"/' gradlew
+          grep 'DEFAULT_JVM_OPTS' gradlew
 
       - name: Clean gradle.properties JVM args
         run: |
