@@ -40,15 +40,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Align Detekt plugin version
+      - name: Normalize Detekt version for CI
         run: |
-          if [ -f app/build.gradle ]; then
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
-          fi
-          if [ -f app/build.gradle.kts ]; then
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
+          if [ -n "$FILES" ]; then
+            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
           fi
 
       - name: Build Debug APK
@@ -94,15 +92,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Align Detekt plugin version
+      - name: Normalize Detekt version for CI
         run: |
-          if [ -f app/build.gradle ]; then
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
-          fi
-          if [ -f app/build.gradle.kts ]; then
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
+          if [ -n "$FILES" ]; then
+            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
           fi
 
       - name: Run instrumented tests
@@ -148,15 +144,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Align Detekt plugin version
+      - name: Normalize Detekt version for CI
         run: |
-          if [ -f app/build.gradle ]; then
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
-          fi
-          if [ -f app/build.gradle.kts ]; then
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
+          if [ -n "$FILES" ]; then
+            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
           fi
 
       - name: Detekt
@@ -203,15 +197,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Align Detekt plugin version
+      - name: Normalize Detekt version for CI
         run: |
-          if [ -f app/build.gradle ]; then
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
-          fi
-          if [ -f app/build.gradle.kts ]; then
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
+          if [ -n "$FILES" ]; then
+            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
           fi
 
       - name: Run dependency check
@@ -255,15 +247,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Align Detekt plugin version
+      - name: Normalize Detekt version for CI
         run: |
-          if [ -f app/build.gradle ]; then
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.4(['\"])/\11.23.0\2/g" app/build.gradle
-            sed -i -E "s/(id ['\"]io.gitlab.arturbosch.detekt['\"], version ['\"])1\.23\.3(['\"])/\11.23.0\2/g" app/build.gradle
-          fi
-          if [ -f app/build.gradle.kts ]; then
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.4(\")/\\11.23.0\\2/g" app/build.gradle.kts
-            sed -i -E "s/(id\\(\"io.gitlab.arturbosch.detekt\"\\) version \")1\\.23\\.3(\")/\\11.23.0\\2/g" app/build.gradle.kts
+          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
+          if [ -n "$FILES" ]; then
+            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
+            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
           fi
 
       - name: Decode keystore
