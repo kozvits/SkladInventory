@@ -40,14 +40,56 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Normalize Detekt version for CI
+      - name: Force plugin versions compatible with classpath
         run: |
-          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
-          if [ -n "$FILES" ]; then
-            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
+          for p in targets:
+              s = p.read_text(encoding='utf-8', errors='ignore')
+
+              # plugins { id 'io.gitlab.arturbosch.detekt' version 'x' }
+              s = re.sub(
+                  r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])",
+                  r"\g<1>1.23.0\2",
+                  s
+              )
+              # plugins { id("io.gitlab.arturbosch.detekt") version "x" }
+              s = re.sub(
+                  r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
+                  r"\g<1>1.23.0\2",
+                  s
+              )
+
+              # plugins { id 'org.jlleitschuh.gradle.ktlint' version 'x' }
+              s = re.sub(
+                  r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])",
+                  r"\g<1>11.5.0\2",
+                  s
+              )
+              # plugins { id("org.jlleitschuh.gradle.ktlint") version "x" }
+              s = re.sub(
+                  r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
+                  r"\g<1>11.5.0\2",
+                  s
+              )
+
+              # buildscript classpath dependencies
+              s = re.sub(
+                  r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*",
+                  r"\g<1>1.23.0",
+                  s
+              )
+              s = re.sub(
+                  r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*",
+                  r"\g<1>11.5.0",
+                  s
+              )
+
+              p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Build Debug APK
         run: gradle --no-daemon assembleDebug --stacktrace
@@ -92,14 +134,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Normalize Detekt version for CI
+      - name: Force plugin versions compatible with classpath
         run: |
-          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
-          if [ -n "$FILES" ]; then
-            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
+          for p in targets:
+              s = p.read_text(encoding='utf-8', errors='ignore')
+              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
+              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -144,14 +195,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Normalize Detekt version for CI
+      - name: Force plugin versions compatible with classpath
         run: |
-          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
-          if [ -n "$FILES" ]; then
-            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
+          for p in targets:
+              s = p.read_text(encoding='utf-8', errors='ignore')
+              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
+              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Detekt
         run: gradle --no-daemon detekt --stacktrace
@@ -197,14 +257,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Normalize Detekt version for CI
+      - name: Force plugin versions compatible with classpath
         run: |
-          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
-          if [ -n "$FILES" ]; then
-            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
+          for p in targets:
+              s = p.read_text(encoding='utf-8', errors='ignore')
+              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
+              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Run dependency check
         run: gradle --no-daemon dependencyCheckAnalyze --stacktrace
@@ -247,14 +316,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Normalize Detekt version for CI
+      - name: Force plugin versions compatible with classpath
         run: |
-          FILES=$(git ls-files '*.gradle' '*.gradle.kts' || true)
-          if [ -n "$FILES" ]; then
-            perl -i -pe "s/(id\\s+['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(id\\(['\"]io\\.gitlab\\.arturbosch\\.detekt['\"]\\)\\s+version\\s+['\"])[^'\"]+(['\"])/\${1}1.23.0\${2}/g" $FILES
-            perl -i -pe "s/(io\\.gitlab\\.arturbosch\\.detekt:detekt-gradle-plugin:)[0-9][^'\"\\s)]*/\${1}1.23.0/g" $FILES
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          targets = [p for p in pathlib.Path('.').rglob('*') if p.suffix in ('.gradle', '.kts') and p.is_file()]
+          for p in targets:
+              s = p.read_text(encoding='utf-8', errors='ignore')
+              s = re.sub(r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
+              s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Decode keystore
         env:
