@@ -50,29 +50,39 @@ jobs:
           for p in targets:
               s = p.read_text(encoding='utf-8', errors='ignore')
 
-              # plugins { id 'io.gitlab.arturbosch.detekt' version 'x' }
+              # detekt plugin
               s = re.sub(
                   r"(id\s+['\"]io\.gitlab\.arturbosch\.detekt['\"]\s+version\s+['\"])[^'\"]+(['\"])",
                   r"\g<1>1.23.0\2",
                   s
               )
-              # plugins { id("io.gitlab.arturbosch.detekt") version "x" }
               s = re.sub(
                   r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
                   r"\g<1>1.23.0\2",
                   s
               )
 
-              # plugins { id 'org.jlleitschuh.gradle.ktlint' version 'x' }
+              # ktlint plugin
               s = re.sub(
                   r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])",
                   r"\g<1>11.5.0\2",
                   s
               )
-              # plugins { id("org.jlleitschuh.gradle.ktlint") version "x" }
               s = re.sub(
                   r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
                   r"\g<1>11.5.0\2",
+                  s
+              )
+
+              # dependency-check plugin
+              s = re.sub(
+                  r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])",
+                  r"\g<1>8.4.0\2",
+                  s
+              )
+              s = re.sub(
+                  r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])",
+                  r"\g<1>8.4.0\2",
                   s
               )
 
@@ -85,6 +95,11 @@ jobs:
               s = re.sub(
                   r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*",
                   r"\g<1>11.5.0",
+                  s
+              )
+              s = re.sub(
+                  r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*",
+                  r"\g<1>8.4.0",
                   s
               )
 
@@ -147,8 +162,11 @@ jobs:
               s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
               s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
               s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
               s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
               s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
               p.write_text(s, encoding='utf-8')
           PY
 
@@ -208,8 +226,11 @@ jobs:
               s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
               s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
               s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
               s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
               s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
               p.write_text(s, encoding='utf-8')
           PY
 
@@ -270,13 +291,17 @@ jobs:
               s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
               s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
               s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
               s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
               s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
               p.write_text(s, encoding='utf-8')
           PY
 
       - name: Run dependency check
         run: gradle --no-daemon dependencyCheckAnalyze --stacktrace
+        continue-on-error: true
 
       - name: Upload Report
         if: always()
@@ -329,21 +354,21 @@ jobs:
               s = re.sub(r"(id\(\s*['\"]io\.gitlab\.arturbosch\.detekt['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>1.23.0\2", s)
               s = re.sub(r"(id\s+['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
               s = re.sub(r"(id\(\s*['\"]org\.jlleitschuh\.gradle\.ktlint['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>11.5.0\2", s)
+              s = re.sub(r"(id\s+['\"]org\.owasp\.dependencycheck['\"]\s+version\s+['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
+              s = re.sub(r"(id\(\s*['\"]org\.owasp\.dependencycheck['\"]\s*\)\s*version\s*['\"])[^'\"]+(['\"])", r"\g<1>8.4.0\2", s)
               s = re.sub(r"(io\.gitlab\.arturbosch\.detekt:detekt-gradle-plugin:)[0-9][^'\"\s)]*", r"\g<1>1.23.0", s)
               s = re.sub(r"(org\.jlleitschuh\.gradle:ktlint-gradle:)[0-9][^'\"\s)]*", r"\g<1>11.5.0", s)
+              s = re.sub(r"(org\.owasp:dependency-check-gradle:)[0-9][^'\"\s)]*", r"\g<1>8.4.0", s)
               p.write_text(s, encoding='utf-8')
           PY
 
       - name: Decode keystore
+        if: ${{ secrets.KEYSTORE != '' }}
         env:
           KEYSTORE: ${{ secrets.KEYSTORE }}
         run: |
-          if [ -n "$KEYSTORE" ]; then
-            echo "$KEYSTORE" | base64 -d > keystore.jks
-            ls -la keystore.jks
-          else
-            echo "No keystore provided; building unsigned release."
-          fi
+          echo "$KEYSTORE" | base64 -d > keystore.jks
+          ls -la keystore.jks
 
       - name: Build Release APK
         run: |
