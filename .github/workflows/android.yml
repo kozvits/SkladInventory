@@ -27,16 +27,31 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
+      # ✅ УБРАН gradle/actions/setup-gradle — он внедряет сломанные JVM-опции
+      # ./gradlew сам скачает Gradle из gradle-wrapper.properties
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Clean injected JVM options from gradle.properties
+        run: |
+          GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+          if [ -f "$GRADLE_PROPS" ]; then
+            echo "=== Before cleanup ==="
+            cat "$GRADLE_PROPS"
+            # Удаляем строки с org.gradle.jvmargs, которые содержат -X флаги
+            sed -i '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS"
+            echo "=== After cleanup ==="
+            cat "$GRADLE_PROPS"
+          else
+            echo "No gradle.properties found, nothing to clean."
+          fi
+          # Записываем безопасные JVM args без проблемных флагов
+          mkdir -p "$HOME/.gradle"
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" >> "$GRADLE_PROPS"
 
       - name: Force plugin versions compatible with classpath
         run: |
@@ -64,28 +79,13 @@ jobs:
           PY
 
       - name: Build Debug APK
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:assembleDebug --stacktrace
+        run: ./gradlew --no-daemon :app:assembleDebug --stacktrace
 
       - name: Run Unit Tests
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:testDebugUnitTest --stacktrace
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --stacktrace
 
       - name: Lint
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:lintDebug --stacktrace
+        run: ./gradlew --no-daemon :app:lintDebug --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -108,16 +108,21 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Clean injected JVM options from gradle.properties
+        run: |
+          GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+          mkdir -p "$HOME/.gradle"
+          if [ -f "$GRADLE_PROPS" ]; then
+            sed -i '' '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS" 2>/dev/null || \
+            sed -i '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS"
+          fi
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" >> "$GRADLE_PROPS"
 
       - name: Force plugin versions compatible with classpath
         run: |
@@ -149,12 +154,7 @@ jobs:
           api-level: 30
           arch: x86_64
           profile: Nexus 6
-          script: |
-            unset JAVA_TOOL_OPTIONS
-            unset _JAVA_OPTIONS
-            unset JAVA_OPTS
-            unset GRADLE_OPTS
-            ./gradlew --no-daemon :app:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew --no-daemon :app:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Test Reports
         if: always()
@@ -178,16 +178,20 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Clean injected JVM options from gradle.properties
+        run: |
+          GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+          mkdir -p "$HOME/.gradle"
+          if [ -f "$GRADLE_PROPS" ]; then
+            sed -i '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS"
+          fi
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" >> "$GRADLE_PROPS"
 
       - name: Force plugin versions compatible with classpath
         run: |
@@ -214,21 +218,11 @@ jobs:
           PY
 
       - name: Detekt
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:detekt --stacktrace
+        run: ./gradlew --no-daemon :app:detekt --stacktrace
         continue-on-error: true
 
       - name: Ktlint
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:ktlintCheck --stacktrace
+        run: ./gradlew --no-daemon :app:ktlintCheck --stacktrace
         continue-on-error: true
 
       - name: Upload Reports
@@ -254,16 +248,20 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Clean injected JVM options from gradle.properties
+        run: |
+          GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+          mkdir -p "$HOME/.gradle"
+          if [ -f "$GRADLE_PROPS" ]; then
+            sed -i '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS"
+          fi
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" >> "$GRADLE_PROPS"
 
       - name: Force plugin versions compatible with classpath
         run: |
@@ -290,12 +288,7 @@ jobs:
           PY
 
       - name: Run dependency check
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
-          ./gradlew --no-daemon :app:dependencyCheckAnalyze --stacktrace
+        run: ./gradlew --no-daemon :app:dependencyCheckAnalyze --stacktrace
         continue-on-error: true
 
       - name: Upload Report
@@ -323,16 +316,20 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Clean injected JVM options from gradle.properties
+        run: |
+          GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+          mkdir -p "$HOME/.gradle"
+          if [ -f "$GRADLE_PROPS" ]; then
+            sed -i '/^org\.gradle\.jvmargs/d' "$GRADLE_PROPS"
+          fi
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" >> "$GRADLE_PROPS"
 
       - name: Force plugin versions compatible with classpath
         run: |
@@ -377,10 +374,6 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          unset JAVA_TOOL_OPTIONS
-          unset _JAVA_OPTIONS
-          unset JAVA_OPTS
-          unset GRADLE_OPTS
           if [ "$KEYSTORE_PRESENT" = "true" ]; then
             ./gradlew --no-daemon :app:assembleRelease \
               -PstoreFile=keystore.jks \
