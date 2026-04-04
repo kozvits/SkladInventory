@@ -29,10 +29,10 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
+import androidx.camera.core.ExperimentalGetImage
+import androidx.compose.runtime.rememberUpdatedState
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -141,6 +141,7 @@ fun ScannerScreen(
     }
 }
 
+@OptIn(ExperimentalGetImage::class)
 @Composable
 private fun CameraPreview(
     isActive: Boolean,
@@ -150,49 +151,30 @@ private fun CameraPreview(
     val lifecycleOwner = LocalLifecycleOwner.current
     val executor = remember { Executors.newSingleThreadExecutor() }
     val barcodeScanner = remember { BarcodeScanning.getClient() }
+    val isActiveRef = rememberUpdatedState(isActive)
+    val onDetectedRef = rememberUpdatedState(onBarcodeDetected)
 
     AndroidView(
         factory = { ctx ->
-            PreviewView(ctx).apply {
+            val previewView = PreviewView(ctx).apply {
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
             }
-        },
-        modifier = Modifier.fillMaxSize(),
-        update = { previewView ->
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
+                val analyzer = BarcodeAnalyzer(
+                    barcodeScanner = barcodeScanner,
+                    isActiveProvider = { isActiveRef.value },
+                    onBarcodeDetected = { onDetectedRef.value(it) }
+                )
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
-
-                imageAnalysis.setAnalyzer(executor) { imageProxy ->
-                    if (!isActive) {
-                        imageProxy.close()
-                        return@setAnalyzer
-                    }
-                    @androidx.camera.core.ExperimentalGetImage
-                    val mediaImage = imageProxy.image
-                    if (mediaImage != null) {
-                        val image = InputImage.fromMediaImage(
-                            mediaImage,
-                            imageProxy.imageInfo.rotationDegrees
-                        )
-                        barcodeScanner.process(image)
-                            .addOnSuccessListener { barcodes ->
-                                barcodes
-                                    .firstOrNull { it.format != Barcode.FORMAT_UNKNOWN }
-                                    ?.rawValue
-                                    ?.let { onBarcodeDetected(it) }
-                            }
-                            .addOnCompleteListener { imageProxy.close() }
-                    } else {
-                        imageProxy.close()
-                    }
-                }
+                    .also { it.setAnalyzer(executor, analyzer) }
 
                 try {
                     cameraProvider.unbindAll()
@@ -205,8 +187,11 @@ private fun CameraPreview(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-            }, ContextCompat.getMainExecutor(context))
-        }
+            }, ContextCompat.getMainExecutor(ctx))
+
+            previewView
+        },
+        modifier = Modifier.fillMaxSize()
     )
 }
 

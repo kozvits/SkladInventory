@@ -66,7 +66,7 @@ fun InventoryScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onScanClick,
-                icon = { Icon(Icons.Default.QrCodeScanner, contentDescription = null) },
+                icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
                 text = { Text(stringResource(R.string.scan)) }
             )
         }
@@ -132,7 +132,7 @@ private fun InventoryItemCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    Icons.Default.Inventory2,
+                    Icons.Default.Inventory,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp)
@@ -202,7 +202,7 @@ private fun EmptyInventoryPlaceholder(modifier: Modifier = Modifier, onScanClick
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.QrCodeScanner,
+            imageVector = Icons.Default.CameraAlt,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
@@ -219,7 +219,7 @@ private fun EmptyInventoryPlaceholder(modifier: Modifier = Modifier, onScanClick
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = onScanClick) {
-            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+            Icon(Icons.Default.CameraAlt, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.scan))
         }
