@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Inventory App</string>
+    <string name="app_name">Склад Инвентаризация</string>
     <string name="camera_permission_required">Требуется разрешение на использование камеры</string>
     <string name="new_product">Новый товар</string>
     <string name="product_name">Название товара</string>
@@ -14,4 +14,6 @@
     <string name="back">Назад</string>
     <string name="inventory_groups">Группы инвентаризации</string>
     <string name="barcode">Штрих-код: %s</string>
+    <string name="items_count">Позиций: %d</string>
+    <string name="total_count">Итого: %d шт.</string>
 </resources>

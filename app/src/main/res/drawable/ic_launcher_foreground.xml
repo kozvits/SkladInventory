@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Barcode icon centered in safe zone (within 72dp inset) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M18,30 L18,78 L90,78 L90,30 Z
+            M26,38 L34,38 L34,70 L26,70 Z
+            M38,38 L42,38 L42,70 L38,70 Z
+            M46,38 L58,38 L58,70 L46,70 Z
+            M62,38 L66,38 L66,70 L62,70 Z
+            M70,38 L82,38 L82,70 L70,70 Z"/>
+</vector>
